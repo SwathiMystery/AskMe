@@ -3,7 +3,8 @@ AskMe
 
 Introduction
 ============
-This is a pet project which resembles like Quora.
+This is a pet project which resembles Quora.
+
 What can you do with this app?
 - ask a question
 - post an answer to a question
