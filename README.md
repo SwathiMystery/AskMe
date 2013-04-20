@@ -26,7 +26,7 @@ Technologies used
 - Spark Web Framework
 - Java
 
-TO-DO
+[TO-DO]
 =====
 Software Quality Environment
 - Checkstyle
