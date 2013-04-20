@@ -24,15 +24,25 @@
  */
 package com.geeksanon;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
  * This class is responsible for controlling the AskMe application. </p>
@@ -46,37 +56,67 @@ public class AppController {
 
 	/** Instance of freemarker configuration **/
 	private final Configuration configuration;
-	/** Obatin the logger instance for logging **/
+	/** Obtain the logger instance for logging **/
 	private static final Logger LOGGER = Logger.getLogger(AppController.class);
 
-	/**
-	 * Default constructor
-	 */
-	public AppController() {
-		configuration = loadTemplateConfiguration();
-	}
+	/** Instance of QuestionDAO **/
+	private final QuestionDAO questionDAO;
+	/** Instance of UserDAO **/
+	private final UserDAO userDAO;
+	/** Instance of SessionDAO **/
+	private final SessionDAO sessionDAO;
 
 	/**
 	 * Method to make a connection to the database, with the URI.
 	 * 
 	 * @param URIString
 	 *            URI passed other than the localhost
-	 * @throws UnknownHostException
-	 *             error when host is not known
+	 * @throws IOException
+	 *             when the page is not found.
 	 */
-	public AppController(String URIString) throws UnknownHostException {
+	public AppController(String URIString) throws IOException {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(URIString));
 		DB database = mongoClient.getDB("askme");
+		questionDAO = new QuestionDAO(database);
+		userDAO = new UserDAO(database);
+		sessionDAO = new SessionDAO(database);
+
 		configuration = loadTemplateConfiguration();
+		Spark.setPort(5115);
+		intialiseRoutes();
 	}
 
 	/**
-	 * Getter of the configuration loaded from template.
+	 * Initialise the routes with get and post.
 	 * 
-	 * @return the configuration
+	 * @throws IOException
+	 *             when not found
 	 */
-	public Configuration getConfiguration() {
-		return configuration;
+	private void intialiseRoutes() throws IOException {
+		Spark.get(new Routes("/", "login.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+				HashMap<String, String> rootMap = new HashMap<String, String>();
+				rootMap.put("username", "");
+				rootMap.put("login_error", "");
+				template.process(rootMap, writer);
+			}
+		});
+
+		Spark.post(new Routes("/", "login.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+				String username = request.queryParams("username");
+				String password = request.queryParams("password");
+				LOGGER.info("Username:" + username + "\n" + "Passowrd: "
+						+ password);
+				
+			}
+		});
 	}
 
 	/**
@@ -91,14 +131,59 @@ public class AppController {
 	}
 
 	/**
+	 * This is an abstract class for freemarker templates routes created.
+	 * 
+	 */
+	abstract class Routes extends Route {
+
+		final Template template;
+
+		/**
+		 * Constructor with the path.
+		 * 
+		 * @throws IOException
+		 *             when no template is found.
+		 */
+		protected Routes(String path, String templateName) throws IOException {
+			super(path);
+			template = configuration.getTemplate(templateName);
+		}
+
+		@Override
+		public Object handle(Request request, Response response) {
+			StringWriter writer = new StringWriter();
+			try {
+				doHandle(request, response, writer);
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.redirect("/_error");
+			}
+			return writer;
+		}
+
+		/**
+		 * Handle the routes.
+		 * 
+		 * @param request
+		 *            Request object
+		 * @param response
+		 *            Response object
+		 * @param writer
+		 *            StringWriter object
+		 */
+		protected abstract void doHandle(Request request, Response response,
+				StringWriter writer) throws IOException, TemplateException;
+	}
+
+	/**
 	 * Entry point to the controller.
 	 * 
 	 * @param args
 	 *            the URIString to make connection. Can be default to localhost
-	 * @throws UnknownHostException
-	 *             if hostname is not known
+	 * @throws IOException
+	 *             when not found.
 	 */
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws IOException {
 		if (args.length == 0) {
 			LOGGER.warn("Using the default hostname : localhost");
 			LOGGER.warn("If you want to use different hostname, run with the $HOSTNAME argument!");
