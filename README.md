@@ -26,5 +26,20 @@ Technologies used
 - Spark Web Framework
 - Java
 
+TO-DO
+=====
+Software Quality Environment
+- Checkstyle
+- Code Formatting
+- Findbugs
+- PMD
+
+Application specific features
+- Credits for answers and questions
+- Search users
+- Follow and unfollow the user
+- Profile creation for a user
+and lots more ...
+
 Keep you posted... 
-when its compeleted!
+when its Done... 
