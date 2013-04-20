@@ -29,6 +29,13 @@ public class AppController {
 	private static final Logger LOGGER = Logger.getLogger(AppController.class);
 
 	/**
+	 * Default constructor.
+	 */
+	public AppController() {
+		configuration = loadTemplateConfiguration();
+	}
+
+	/**
 	 * Method to make a connection to the database, with the URI.
 	 * 
 	 * @param URIString
@@ -40,6 +47,15 @@ public class AppController {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(URIString));
 		DB database = mongoClient.getDB("askme");
 		configuration = loadTemplateConfiguration();
+	}
+
+	/**
+	 * Getter of the configuration loaded from template.
+	 * 
+	 * @return the configuration
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 
 	/**
@@ -57,9 +73,17 @@ public class AppController {
 	 * Entry point to the controller.
 	 * 
 	 * @param args
-	 *            the URIString to make connection. Can be default to localhost.
+	 *            the URIString to make connection. Can be default to localhost
+	 * @throws UnknownHostException
+	 *             if hostname is not known
 	 */
-	public static void main(String[] args) {
-
+	public static void main(String[] args) throws UnknownHostException {
+		if (args.length == 0) {
+			LOGGER.warn("Using the default hostname : localhost");
+			LOGGER.warn("If you want to use different hostname, run with the $HOSTNAME argument!");
+			new AppController("mongodb://localhost");
+		} else {
+			new AppController(args[0]);
+		}
 	}
 }

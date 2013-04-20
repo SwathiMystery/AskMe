@@ -60,7 +60,7 @@
      <div class="container">
     
       <form class="form-signin" method="post">
-        <h2 class="form-signin-heading">Login</h2>  Need to Create an account? <a href="/signup">Signup</a></p>
+        <h2 class="form-signin-heading">Login</h2> Create an account - <a href="/signup">Signup</a></p>
         <input type="text" name="username" class="input-block-level" placeholder="Username" value="${username}" class="error">
         <input type="password" name="password" class="input-block-level" placeholder="Password" value="" class="error">
         <p class="error">
