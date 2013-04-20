@@ -29,6 +29,9 @@ import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 
+import javax.servlet.http.Cookie;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import spark.Request;
@@ -37,6 +40,7 @@ import spark.Route;
 import spark.Spark;
 
 import com.mongodb.DB;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
@@ -114,6 +118,29 @@ public class AppController {
 				String password = request.queryParams("password");
 				LOGGER.info("Username:" + username + "\n" + "Passowrd: "
 						+ password);
+				
+				DBObject user = userDAO.validateLoginCred(username, password);
+				
+				if(user!=null) {
+					LOGGER.info("Valid user: "+ username);
+					String sessionID = sessionDAO.startSession(user.get("_id").toString());
+					if(sessionID==null) {
+						LOGGER.error("SessionID is null");
+						response.redirect("/_error");
+					}
+					else {
+						LOGGER.info("Session ID added to cookie for user:"+ username);
+						response.raw().addCookie(new Cookie("session", sessionID));
+						response.redirect("/welcome_note.ftl");
+					}
+				}
+				else {
+					HashMap< String, String> rootMap = new HashMap<String, String>();
+					rootMap.put("username", StringEscapeUtils.escapeHtml4(username));
+					rootMap.put("password", "");
+					rootMap.put("login_error", "Invalid Login! Try Again.");
+					template.process(rootMap, writer);
+				}
 				
 			}
 		});

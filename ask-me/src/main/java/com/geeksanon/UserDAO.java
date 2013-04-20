@@ -24,8 +24,18 @@
  */
 package com.geeksanon;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import org.apache.log4j.Logger;
+
+import sun.misc.BASE64Encoder;
+
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 /**
  * A Data Access Object class with the collection users, performing all
@@ -39,6 +49,9 @@ public class UserDAO {
 	/** Instance of collection **/
 	private final DBCollection userCollection;
 
+	/** Obtain the logger instance for logging **/
+	private static final Logger LOGGER = Logger.getLogger(UserDAO.class);
+
 	/**
 	 * Gets the users collection from the database.
 	 * 
@@ -49,4 +62,45 @@ public class UserDAO {
 		userCollection = database.getCollection("users");
 	}
 
+	/**
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public DBObject validateLoginCred(String username, String password) {
+		DBObject user = userCollection.findOne(new BasicDBObject("_id",
+				username));
+		if (user == null) {
+			LOGGER.error("User: " + username + "not found!");
+			return null;
+		}
+		String hashedPassword = user.get("password").toString();
+		String extra = hashedPassword.split("/")[1];
+		if (!hashedPassword.equals(createHashPassword(password, extra))) {
+			LOGGER.error("Password does not match!");
+			return null;
+		}
+		return user;
+	}
+
+	/**
+	 * @param password
+	 * @param extra
+	 * @return
+	 */
+	private String createHashPassword(String password, String extra) {
+		try {
+			String passwordExtra = password + "/" + extra;
+			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+			messageDigest.update(passwordExtra.getBytes());
+			BASE64Encoder encoder = new BASE64Encoder();
+			byte hashedBytes[] = (new String(messageDigest.digest(), "UTF-8"))
+					.getBytes();
+			return encoder.encode(hashedBytes) + "/" + extra;
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("MD5 algorithm is not available", e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException("UTF-8 Format unavailable?", e);
+		}
+	}
 }

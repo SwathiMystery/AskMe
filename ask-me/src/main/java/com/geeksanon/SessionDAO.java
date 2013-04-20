@@ -24,6 +24,12 @@
  */
 package com.geeksanon;
 
+import java.security.SecureRandom;
+
+import sun.misc.BASE64Encoder;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.Bytes;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
@@ -34,7 +40,7 @@ import com.mongodb.DBCollection;
 public class SessionDAO {
 
 	/** Instance of collection **/
-	private final DBCollection sessionCollection;
+	private final DBCollection sessionsCollection;
 
 	/**
 	 * Gets the sessions collection from the database.
@@ -42,7 +48,28 @@ public class SessionDAO {
 	 * @param database
 	 */
 	public SessionDAO(DB database) {
-		sessionCollection = database.getCollection("sessions");
+		sessionsCollection = database.getCollection("sessions");
+	}
+
+	/**
+	 * Insert the session ID and username in the sessions collection, where the
+	 * ID session ID generated is 32bytes.
+	 * 
+	 * @param string
+	 * @return
+	 */
+	public String startSession(String username) {
+		SecureRandom secureRandom = new SecureRandom();
+		byte randomBytes[] = new byte[32];
+		secureRandom.nextBytes(randomBytes);
+		BASE64Encoder encoder = new BASE64Encoder();
+		String sessionID = encoder.encode(randomBytes);
+
+		BasicDBObject session = new BasicDBObject("username", username).append(
+				"_id", sessionID);
+
+		sessionsCollection.insert(session);
+		return session.get("_id").toString();
 	}
 
 }
