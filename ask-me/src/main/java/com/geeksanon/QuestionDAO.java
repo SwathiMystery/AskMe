@@ -24,10 +24,29 @@
  */
 package com.geeksanon;
 
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+
 /**
+ * A Data Access Object class with the collection questions, performing all
+ * necessary operations or querying on it.
+ * 
  * @author Swathi V
- *
+ * 
  */
 public class QuestionDAO {
+
+	/** Instance of collection **/
+	private final DBCollection questionsCollection;
+
+	/**
+	 * Gets the questions collection from the database.
+	 * 
+	 * @param database
+	 *            is the database
+	 */
+	public QuestionDAO(DB database) {
+		questionsCollection = database.getCollection("questions");
+	}
 
 }

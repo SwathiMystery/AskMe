@@ -24,10 +24,25 @@
  */
 package com.geeksanon;
 
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+
 /**
  * @author Swathi V
- *
+ * 
  */
 public class SessionDAO {
+
+	/** Instance of collection **/
+	private final DBCollection sessionCollection;
+
+	/**
+	 * Gets the sessions collection from the database.
+	 * 
+	 * @param database
+	 */
+	public SessionDAO(DB database) {
+		sessionCollection = database.getCollection("sessions");
+	}
 
 }

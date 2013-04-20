@@ -24,10 +24,29 @@
  */
 package com.geeksanon;
 
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+
 /**
+ * A Data Access Object class with the collection users, performing all
+ * necessary operations or querying on it.
+ * 
  * @author Swathi V
- *
+ * 
  */
 public class UserDAO {
+
+	/** Instance of collection **/
+	private final DBCollection userCollection;
+
+	/**
+	 * Gets the users collection from the database.
+	 * 
+	 * @param database
+	 *            is the database
+	 */
+	public UserDAO(DB database) {
+		userCollection = database.getCollection("users");
+	}
 
 }
