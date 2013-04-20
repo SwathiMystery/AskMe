@@ -27,6 +27,8 @@ package com.geeksanon;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 
@@ -36,6 +38,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 
 /**
  * A Data Access Object class with the collection users, performing all
@@ -101,6 +104,34 @@ public class UserDAO {
 			throw new RuntimeException("MD5 algorithm is not available", e);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException("UTF-8 Format unavailable?", e);
+		}
+	}
+
+	/**
+	 * Add the user to the database.
+	 * 
+	 * @param username
+	 *            username
+	 * @param password
+	 *            password
+	 * @param email
+	 *            email
+	 * @return boolean if added/ not
+	 */
+	public boolean addUser(String username, String password, String email) {
+		String hashedPassword = createHashPassword(password,
+				Integer.toString(new SecureRandom().nextInt()));
+		BasicDBObject user = new BasicDBObject().append("username", username)
+				.append("password", hashedPassword);
+		if (email != null && !email.equals("")) {
+			user.append("email", email);
+		}
+		try {
+			userCollection.insert(user);
+			return true;
+		} catch (MongoException.DuplicateKey e) {
+			LOGGER.error("Username exists!");
+			return false;
 		}
 	}
 }

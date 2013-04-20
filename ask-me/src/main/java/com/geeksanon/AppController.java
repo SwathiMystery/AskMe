@@ -97,7 +97,11 @@ public class AppController {
 	 *             when not found
 	 */
 	private void intialiseRoutes() throws IOException {
-		Spark.get(new Routes("/", "login.ftl") {
+
+		/**
+		 * Handle the login of the user.
+		 */
+		Spark.get(new Routes("/login", "login.ftl") {
 
 			@Override
 			protected void doHandle(Request request, Response response,
@@ -109,7 +113,7 @@ public class AppController {
 			}
 		});
 
-		Spark.post(new Routes("/", "login.ftl") {
+		Spark.post(new Routes("/login", "login.ftl") {
 
 			@Override
 			protected void doHandle(Request request, Response response,
@@ -118,30 +122,89 @@ public class AppController {
 				String password = request.queryParams("password");
 				LOGGER.info("Username:" + username + "\n" + "Passowrd: "
 						+ password);
-				
+
 				DBObject user = userDAO.validateLoginCred(username, password);
-				
-				if(user!=null) {
-					LOGGER.info("Valid user: "+ username);
-					String sessionID = sessionDAO.startSession(user.get("_id").toString());
-					if(sessionID==null) {
+
+				if (user != null) {
+					LOGGER.info("Valid user: " + username);
+					String sessionID = sessionDAO.startSession(user.get("_id")
+							.toString());
+					if (sessionID == null) {
 						LOGGER.error("SessionID is null");
 						response.redirect("/_error");
-					}
-					else {
-						LOGGER.info("Session ID added to cookie for user:"+ username);
-						response.raw().addCookie(new Cookie("session", sessionID));
+					} else {
+						LOGGER.info("Session ID added to cookie for user:"
+								+ username);
+						response.raw().addCookie(
+								new Cookie("session", sessionID));
 						response.redirect("/welcome_note.ftl");
 					}
-				}
-				else {
-					HashMap< String, String> rootMap = new HashMap<String, String>();
-					rootMap.put("username", StringEscapeUtils.escapeHtml4(username));
+				} else {
+					HashMap<String, String> rootMap = new HashMap<String, String>();
+					rootMap.put("username",
+							StringEscapeUtils.escapeHtml4(username));
 					rootMap.put("password", "");
 					rootMap.put("login_error", "Invalid Login! Try Again.");
 					template.process(rootMap, writer);
 				}
-				
+			}
+		});
+
+		/**
+		 * Handle the signup of the user to create an account.
+		 */
+		Spark.get(new Routes("/signup", "signup.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+				HashMap<String, String> rootMap = new HashMap<String, String>();
+				rootMap.put("username", "");
+				rootMap.put("password", "");
+				rootMap.put("email", "");
+				rootMap.put("username_error", "");
+				rootMap.put("password_error", "");
+				rootMap.put("verify_error", "");
+				rootMap.put("email_error", "");
+				template.process(rootMap, writer);
+			}
+		});
+
+		Spark.post(new Routes("/signup", "signup.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+				String username = request.queryParams("username");
+				String password = request.queryParams("password");
+				String verifyPassword = request.queryParams("verify");
+				String email = request.queryParams("email");
+
+				HashMap<String, String> rootMap = new HashMap<String, String>();
+				rootMap.put("username", StringEscapeUtils.escapeHtml4(username));
+				rootMap.put("email", StringEscapeUtils.escapeHtml4(email));
+				boolean isValid = Validation.validateForm(username, password,
+						verifyPassword, email, rootMap);
+				if (isValid) {
+					LOGGER.info("Creating user with Username : " + username
+							+ "and Password :" + password);
+					boolean isAdded = userDAO
+							.addUser(username, password, email);
+					if (!isAdded) {
+						rootMap.put("username_error",
+								"Username already exist! Please try another");
+						template.process(rootMap, writer);
+					} else {
+						String sessionID = sessionDAO.startSession(username);
+						LOGGER.info("Session ID : " + sessionID);
+						response.raw().addCookie(
+								new Cookie("session", sessionID));
+						response.redirect("/welcome_note.ftl");
+					}
+				} else {
+					LOGGER.error("Validation failed!!");
+					template.process(rootMap, writer);
+				}
 			}
 		});
 	}
