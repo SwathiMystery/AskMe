@@ -40,6 +40,8 @@ Application specific features
 - Search users
 - Follow and unfollow the user
 - Profile creation for a user
+- Email verification during signup 
+  and making compulsory
 and lots more ...
 
 Keep you posted... 
