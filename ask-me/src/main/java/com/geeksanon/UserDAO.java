@@ -74,11 +74,11 @@ public class UserDAO {
 		DBObject user = userCollection.findOne(new BasicDBObject("_id",
 				username));
 		if (user == null) {
-			LOGGER.error("User: " + username + "not found!");
+			LOGGER.error("User: " + username + " not found!");
 			return null;
 		}
 		String hashedPassword = user.get("password").toString();
-		String extra = hashedPassword.split("/")[1];
+		String extra = hashedPassword.split(",")[1];
 		if (!hashedPassword.equals(createHashPassword(password, extra))) {
 			LOGGER.error("Password does not match!");
 			return null;
@@ -93,13 +93,13 @@ public class UserDAO {
 	 */
 	private String createHashPassword(String password, String extra) {
 		try {
-			String passwordExtra = password + "/" + extra;
+			String passwordExtra = password + "," + extra;
 			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 			messageDigest.update(passwordExtra.getBytes());
 			BASE64Encoder encoder = new BASE64Encoder();
 			byte hashedBytes[] = (new String(messageDigest.digest(), "UTF-8"))
 					.getBytes();
-			return encoder.encode(hashedBytes) + "/" + extra;
+			return encoder.encode(hashedBytes) + "," + extra;
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException("MD5 algorithm is not available", e);
 		} catch (UnsupportedEncodingException e) {
@@ -121,7 +121,7 @@ public class UserDAO {
 	public boolean addUser(String username, String password, String email) {
 		String hashedPassword = createHashPassword(password,
 				Integer.toString(new SecureRandom().nextInt()));
-		BasicDBObject user = new BasicDBObject().append("username", username)
+		BasicDBObject user = new BasicDBObject().append("_id", username)
 				.append("password", hashedPassword);
 		if (email != null && !email.equals("")) {
 			user.append("email", email);

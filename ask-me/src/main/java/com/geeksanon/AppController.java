@@ -120,7 +120,7 @@ public class AppController {
 					StringWriter writer) throws IOException, TemplateException {
 				String username = request.queryParams("username");
 				String password = request.queryParams("password");
-				LOGGER.info("Username:" + username + "\n" + "Passowrd: "
+				LOGGER.info("Username:" + username + "\n" + "Password: "
 						+ password);
 
 				DBObject user = userDAO.validateLoginCred(username, password);
@@ -207,6 +207,29 @@ public class AppController {
 				}
 			}
 		});
+
+		/**
+		 * Welcome note to either ask a question, go-home or logout! Handle
+		 * welcome page.
+		 */
+		Spark.get(new Routes("/welcome", "/welcome_note.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+
+			}
+		});
+
+		Spark.post(new Routes("/welcome", "/welcome_note.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+
+			}
+		});
+
 	}
 
 	/**
