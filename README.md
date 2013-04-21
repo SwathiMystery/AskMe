@@ -42,6 +42,7 @@ Application specific features
 - Profile creation for a user
 - Email verification during signup 
   and making compulsory
+- Search with auto-complete feature
 and lots more ...
 
 Keep you posted... 
