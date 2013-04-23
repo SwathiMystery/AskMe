@@ -78,9 +78,9 @@
       <hr>
 
       <div class="jumbotron">
-        <h1>Ask Me is yet another Q&A application!</h1>
-        <p class="lead"> Wanna browse the questions and answers? Go-to Home!</p>
-        <a class="btn btn-large btn-success" href="/new_question">Ask a Question today</a>
+        <h2>Ask Me is yet another Question and Answer application!</h2>
+        <p class="lead"> Wanna search for or browse the questions and answers? Go-to Home!</p>
+        <a class="btn btn-large btn-success" href="/new_question">Ask a Question now!</a>
       </div>
 
       <hr>

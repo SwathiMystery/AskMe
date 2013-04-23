@@ -26,7 +26,6 @@ package com.geeksanon;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
@@ -137,7 +136,7 @@ public class AppController {
 								+ username);
 						response.raw().addCookie(
 								new Cookie("session", sessionID));
-						response.redirect("/welcome_note.ftl");
+						response.redirect("/welcome");
 					}
 				} else {
 					HashMap<String, String> rootMap = new HashMap<String, String>();
@@ -183,7 +182,7 @@ public class AppController {
 				HashMap<String, String> rootMap = new HashMap<String, String>();
 				rootMap.put("username", StringEscapeUtils.escapeHtml4(username));
 				rootMap.put("email", StringEscapeUtils.escapeHtml4(email));
-				boolean isValid = Validation.validateForm(username, password,
+				boolean isValid = Helper.validateForm(username, password,
 						verifyPassword, email, rootMap);
 				if (isValid) {
 					LOGGER.info("Creating user with Username : " + username
@@ -199,7 +198,7 @@ public class AppController {
 						LOGGER.info("Session ID : " + sessionID);
 						response.raw().addCookie(
 								new Cookie("session", sessionID));
-						response.redirect("/welcome_note.ftl");
+						response.redirect("/welcome");
 					}
 				} else {
 					LOGGER.error("Validation failed!!");
@@ -217,16 +216,16 @@ public class AppController {
 			@Override
 			protected void doHandle(Request request, Response response,
 					StringWriter writer) throws IOException, TemplateException {
-
-			}
-		});
-
-		Spark.post(new Routes("/welcome", "/welcome_note.ftl") {
-
-			@Override
-			protected void doHandle(Request request, Response response,
-					StringWriter writer) throws IOException, TemplateException {
-
+				String cookie = Helper.getSessionCookie(request);
+				String username = sessionDAO.getUserSessionID(cookie);
+				if (username == null) {
+					LOGGER.error("Username not found. May be Signup?");
+					response.redirect("/signup");
+				} else {
+					HashMap<String, String> rootMap = new HashMap<String, String>();
+					rootMap.put("username", username);
+					template.process(rootMap, writer);
+				}
 			}
 		});
 

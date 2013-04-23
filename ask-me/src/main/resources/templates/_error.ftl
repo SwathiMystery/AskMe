@@ -24,7 +24,7 @@
 </head>
 <body>
 
-<div class="hero-unit center" display="block">
+<div class="hero-unit center" display="block" style="background-image: url(../images/cow_graze.jpg);">
 <h1>Oh SNAP!! </h1>
 <h3>You stumbled across a page that doesn't exist! <br>
 Ooops.. I did it again! </h3>

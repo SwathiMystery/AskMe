@@ -32,6 +32,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Bytes;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 /**
  * @author Swathi V
@@ -70,6 +71,22 @@ public class SessionDAO {
 
 		sessionsCollection.insert(session);
 		return session.get("_id").toString();
+	}
+
+	/**
+	 * Get the username from the SessionID.
+	 * 
+	 * @param cookie
+	 *            session ID
+	 * @return username
+	 */
+	public String getUserSessionID(String cookie) {
+		DBObject session = sessionsCollection.findOne(new BasicDBObject()
+				.append("_id", cookie));
+		if (session == null) {
+			return null;
+		} else
+			return (String) session.get("username");
 	}
 
 }
