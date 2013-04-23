@@ -43,6 +43,7 @@ Application specific features
 - Email verification during signup 
   and making compulsory
 - Search with auto-complete feature
+- Improve README, add screenshots
 and lots more ...
 
 Keep you posted... 
