@@ -119,7 +119,7 @@ public class Helper {
 	 *            HTTP request
 	 * @return cookie
 	 */
-	public Cookie getSessionCookieActual(final Request request) {
+	public static Cookie getSessionCookieActual(final Request request) {
 		if (request.raw().getCookies() == null) {
 			return null;
 		}
@@ -130,4 +130,5 @@ public class Helper {
 		}
 		return null;
 	}
+
 }

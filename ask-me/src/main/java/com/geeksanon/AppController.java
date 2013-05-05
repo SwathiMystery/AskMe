@@ -229,6 +229,27 @@ public class AppController {
 			}
 		});
 
+		/**
+		 * Logout from the current session.
+		 */
+		Spark.get(new Routes("/logout", "/login.ftl") {
+
+			@Override
+			protected void doHandle(Request request, Response response,
+					StringWriter writer) throws IOException, TemplateException {
+				String sessionID = Helper.getSessionCookie(request);
+				if (sessionID == null) {
+					response.redirect("/login");
+				} else {
+					sessionDAO.stopSession(sessionID);
+					Cookie cookie = Helper.getSessionCookieActual(request);
+					cookie.setMaxAge(0);
+					response.raw().addCookie(cookie);
+					response.redirect("/login");
+				}
+			}
+		});
+
 	}
 
 	/**

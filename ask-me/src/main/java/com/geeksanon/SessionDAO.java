@@ -89,4 +89,13 @@ public class SessionDAO {
 			return (String) session.get("username");
 	}
 
+	/**
+	 * Delete the session ID from the table.
+	 * 
+	 * @param sessionID
+	 */
+	public void stopSession(String sessionID) {
+		sessionsCollection.remove(new BasicDBObject("_id", sessionID));
+	}
+
 }
